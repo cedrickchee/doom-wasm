@@ -90,7 +90,7 @@ OBJS=				\
 		$(O)/info.o				\
 		$(O)/sounds.o
 
-all: makedir build
+all: $(O)/linuxxdoom
 
 makedir:
 	mkdir -p $(O)
@@ -108,6 +108,7 @@ $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
+	mkdir -p $(O)
 	$(CC) $(CFLAGS) -nostdlib -c $< -o $@
 
 $(O)/liblinuxxdoom.a: $(OBJS)
