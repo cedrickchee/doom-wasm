@@ -4,7 +4,7 @@
 #
 # $Log:$
 #
-CC=  gcc  # gcc or g++
+CC=  clang  # gcc or g++
 
 # doom was written with the implicit assumption that ints and pointers are 32bit.
 # Adding -m32 to make it compile on 64bit archs.
