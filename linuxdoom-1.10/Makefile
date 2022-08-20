@@ -5,13 +5,14 @@
 # $Log:$
 #
 CC=clang
+AR=llvm-ar-10
 
 # doom was written with the implicit assumption that ints and pointers are 32bit.
 # Adding -m32 to make it compile on 64bit archs.
 # on Ubuntu 20.04:
 # apt install gcc-multilib libx11-dev:i386 libxext-dev:i386
 
-CFLAGS=-m32 -g -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX # -DUSEASM
+CFLAGS=-m32 -O2 -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lnsl -lm
 
@@ -93,12 +94,17 @@ clean:
 
 build: $(O)/linuxxdoom
 
+# link-time optimization only when building the binary, but not when building
+# the *.o files, since we want to link them with rust.
 $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
+	$(CC) -flto $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(O)/liblinuxxdoom.a: $(OBJS)
+	$(AR) rcs $@ $^
 
 run:
 	# sleep 5 # ugly!! waiting for Xephyr to start.
