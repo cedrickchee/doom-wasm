@@ -101,7 +101,7 @@ $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -nostdlib -c $< -o $@
 
 $(O)/liblinuxxdoom.a: $(OBJS)
 	$(AR) rcs $@ $^
