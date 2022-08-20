@@ -100,6 +100,18 @@ $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+run:
+	# sleep 5 # ugly!! waiting for Xephyr to start.
+	# DISPLAY=:1 ./$(O)/linuxxdoom
+	./$(O)/linuxxdoom
+
+start-xephyr:
+	Xephyr -ac -screen 320x200x8 -br -reset -terminate -title DOOM 2> /dev/null :2 &
+
+connect-vm:
+	# X11 forwarding to Xephyr
+	DISPLAY=:2 ssh -X clickhouse.mps.local
+
 #############################################################
 #
 #############################################################
