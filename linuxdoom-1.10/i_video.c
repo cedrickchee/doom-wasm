@@ -817,6 +817,13 @@ void I_InitGraphics(void)
 					attribmask,
 					&attribs );
 
+	// Make DOOM work on Ubuntu
+	//
+	// When DOOM running within X window in PseudoColor 8bpp mode, the colormap
+	// wasn't being picked up. This change correct this.
+	// I found this fix in a StackOverflow thread here: https://stackoverflow.com/a/63928317
+	XInstallColormap(X_display, X_cmap);
+
     XDefineCursor(X_display, X_mainWindow,
 		  createnullcursor( X_display, X_mainWindow ) );
 
