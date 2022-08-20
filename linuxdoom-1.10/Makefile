@@ -14,7 +14,7 @@ AR=llvm-ar-10
 
 CFLAGS=-m32 -O2 -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lXext -lX11 -lnsl
+LIBS=-lX11 -lnsl
 
 # subdirectory for objects
 O=linux
