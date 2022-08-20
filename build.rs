@@ -1,5 +1,5 @@
 fn main() {
-    // TODO: go to linuxdoom-1.10 and `make linux/linuxxdoom.a` first
+    // TODO: go to linuxdoom-1.10 and `make linux/liblinuxxdoom.a` first
     println!("cargo:rustc-link-search=linuxdoom-1.10/linux");
     println!("cargo:rustc-link-lib=linuxxdoom");
 
