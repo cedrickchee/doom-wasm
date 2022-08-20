@@ -3,6 +3,7 @@ linuxdoom-1.10/linux
 linuxdoom
 *.o
 *.wad
+_*.txt
 
 # Added by cargo
 
