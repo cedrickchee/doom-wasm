@@ -5,14 +5,17 @@ static DOOM_SRC: &str = "linuxdoom-1.10";
 fn main() {
     println!("cargo:rerun-if-changed={}", DOOM_SRC);
 
+    // Compile to executable
+    // If compile failed, don't panic, instead continue to compile the static lib.
     let build_status = Command::new("make")
         .args(&["-C", DOOM_SRC])
         .status()
         .expect("failed to start make");
     if !build_status.success(){
-        panic!("make failed to build: {}", build_status);
+        println!("failed to create executable: {build_status}");
     }
 
+    // Compile to static library
     let ar_status = Command::new("make")
         .args(&["-C", DOOM_SRC, "linux/liblinuxxdoom.a"])
         .status()
@@ -25,5 +28,5 @@ fn main() {
     println!("cargo:rustc-link-lib=linuxxdoom");
 
     // libraries which should be removed before going to wasm
-    println!("cargo:rustc-link-lib=X11");
+    // println!("cargo:rustc-link-lib=X11");
 }
