@@ -1,5 +1,5 @@
 use std::ffi::CString;
-use std::ffi::CStr;
+use std::ffi::{CStr, c_void};
 use std::os::raw::{c_char, c_int, c_long, c_double};
 
 #[allow(non_camel_case_types)]
@@ -66,8 +66,8 @@ struct IOVec {
 
 #[no_mangle]
 extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
-    if n==20 /*SYS_writev*/ && a1 == 1 /*STDOUT*/ {
-        log!("SYS_writev to STDOUT");
+    if n==20 /*SYS_writev*/ && (a1 == 1 /*STDOUT*/ || a1 == 2 /*STDERR*/) {
+        log!("SYS_writev to STDOUT/STDERR");
 
         let iov_ptr: *const IOVec = a2 as *const IOVec;
         let iovcnt = a3 as usize;
@@ -79,11 +79,30 @@ extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
         }
         return bytes_written;
     }else{
-        log!("other __syscall3");
+        log!("other __syscall3({}, {}, {}, {})", n, a1, a2, a3);
     }
     return -1;
 }
 
+#[no_mangle]
+extern "C" fn malloc(size: usize) -> *const c_void {
+    // pub fn into_raw(this: Rc<T>) -> *const T
+    let mut mem: Vec<u8> = std::vec::Vec::with_capacity(size);
+    unsafe { mem.set_len(size) };
+    let static_ref: &'static mut [u8] = mem.leak(); //TODO make free()-able.
+    static_ref as *mut [u8] as *mut c_void
+}
+
+#[no_mangle]
+extern "C" fn free(_: i32) {
+    panic!("free unimplemented");
+}
+
+static mut single_thread_errno: c_int = 0; // YOLO
+#[no_mangle]
+extern "C" fn ___errno_location() -> *const c_int {
+    unsafe { &single_thread_errno }
+}
 
 
 // generated
@@ -101,11 +120,6 @@ extern "C" fn fabsl(_: i32, _: i64, _: i64) { // type??
 #[no_mangle]
 extern "C" fn I_ReadScreen(_: i32) {
     panic!("I_ReadScreen unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn ___errno_location() -> i32 {
-    panic!("___errno_location unimplemented");
 }
 
 #[no_mangle]
@@ -146,11 +160,6 @@ extern "C" fn I_SetPalette(_: i32) {
 #[no_mangle]
 extern "C" fn I_FinishUpdate() {
     panic!("I_FinishUpdate unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn malloc(_: i32) -> i32 {
-    panic!("malloc unimplemented");
 }
 
 #[no_mangle]
@@ -226,11 +235,6 @@ extern "C" fn access(_: i32, _: i32) -> i32 {
 #[no_mangle]
 extern "C" fn __toread(_: i32) -> i32 {
     panic!("__toread unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn free(_: i32) {
-    panic!("free unimplemented");
 }
 
 #[no_mangle]
