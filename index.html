@@ -28,7 +28,7 @@
         }
       };
 
-      WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/xdoom.wasm'), importObject)
+      WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
         .then(obj => {
           obj.instance.exports.main();
         });
