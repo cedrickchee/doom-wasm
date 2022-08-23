@@ -1,6 +1,6 @@
 use std::ffi::CString;
 use std::ffi::{CStr, c_void};
-use std::os::raw::{c_char, c_int, c_long, c_double};
+use std::os::raw::{c_char, c_int};
 
 #[allow(non_camel_case_types)]
 pub type c_wchar = ::std::os::raw::c_long;
@@ -34,9 +34,6 @@ macro_rules! log {
 }
 
 macro_rules! println { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
-macro_rules! print { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
-
-
 
 #[no_mangle]
 extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
@@ -44,12 +41,32 @@ extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
 }
 
 #[no_mangle]
-extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
+extern "C" fn frexpl(_: i32, _: i64, _: i64, _: i32) {
+    // type??
+    panic!("frexpl unimplemented");
+}
+
+#[no_mangle]
+extern "C" fn fabsl(_: i32, _: i64, _: i64) {
+    // type??
+    panic!("fabsl unimplemented");
+}
+
+static HOME_ENV: &'static [u8; 11] = b"/home/doom\0"; // C string, terminate with \0!
+
+// Called by d_main.c where D_DoomMain is
+// Resolved Doom error "Please set $HOME to your home directory"
+#[no_mangle]
+extern "C" fn getenv(name: *const c_char) -> Option<&'static [u8; 11]> {
+    // TODO type!!!
     let name = unsafe { CStr::from_ptr(name) };
     let name = name.to_str().expect("invalid UTF8 getenv call");
+    log!("name: {}", name);
     let result = match name {
         "DOOMWADDIR" => None,
-        "HOME" => None,
+        // this line is important to make Doom successfully not starting because
+        // no WAD is available and not because of other problems.
+        "HOME" => Some(HOME_ENV),
         _ => {
             log!("unexepcted getenv({:?}) call", name);
             None
@@ -60,13 +77,18 @@ extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
 
 struct IOVec {
     iov_base: *const u8, // void*
-    iov_len: usize, // size_t
+    iov_len: usize,      // size_t
 }
 
 
 #[no_mangle]
-extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
-    if n==20 /*SYS_writev*/ && (a1 == 1 /*STDOUT*/ || a1 == 2 /*STDERR*/) {
+extern "C" fn __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
+    const SYS_WRITEV: c_int = 20;
+
+    const STDOUT: c_int = 1;
+    const STDERR: c_int = 2;
+
+    if n == SYS_WRITEV && (a1 == STDOUT || a1 == STDERR) {
         log!("SYS_writev to STDOUT/STDERR");
 
         let iov_ptr: *const IOVec = a2 as *const IOVec;
@@ -74,11 +96,14 @@ extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
         let iovs = unsafe { std::slice::from_raw_parts(iov_ptr, iovcnt) };
         let mut bytes_written = 0;
         for iov in iovs {
+            if iov.iov_len == 0 {
+                continue;
+            }
             unsafe { console_log(iov.iov_base, iov.iov_len) };
             bytes_written += iov.iov_len as i32;
         }
         return bytes_written;
-    }else{
+    } else {
         log!("other __syscall3({}, {}, {}, {})", n, a1, a2, a3);
     }
     return -1;
@@ -86,7 +111,6 @@ extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
 
 #[no_mangle]
 extern "C" fn malloc(size: usize) -> *const c_void {
-    // pub fn into_raw(this: Rc<T>) -> *const T
     let mut mem: Vec<u8> = std::vec::Vec::with_capacity(size);
     unsafe { mem.set_len(size) };
     let static_ref: &'static mut [u8] = mem.leak(); //TODO make free()-able.
@@ -98,10 +122,10 @@ extern "C" fn free(_: i32) {
     panic!("free unimplemented");
 }
 
-static mut single_thread_errno: c_int = 0; // YOLO
+static mut SINGLE_THREAD_ERRNO: c_int = 0; // YOLO
 #[no_mangle]
 extern "C" fn ___errno_location() -> *const c_int {
-    unsafe { &single_thread_errno }
+    unsafe { &SINGLE_THREAD_ERRNO }
 }
 
 #[no_mangle]
@@ -132,18 +156,14 @@ extern "C" fn fopen(pathname: *const c_char, mode: c_int) -> i32 /* FILE* */ {
     panic!("fopen({}, {}) unimplemented", pathname, mode);
 }
 
+#[no_mangle]
+extern "C" fn I_ShutdownGraphics() {
+    log!("Bye!! TODO: implement I_ShutdownGraphics");
+}
+
 
 // generated
 
-#[no_mangle]
-extern "C" fn frexpl(_: i32, _: i64, _: i64, _: i32) { // type??
-    panic!("frexpls unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn fabsl(_: i32, _: i64, _: i64) { // type??
-    panic!("fabsl unimplemented");
-}
 
 #[no_mangle]
 extern "C" fn I_ReadScreen(_: i32) {
@@ -196,11 +216,6 @@ extern "C" fn gettimeofday(_: i32, _: i32) -> i32 {
 }
 
 #[no_mangle]
-extern "C" fn I_ShutdownGraphics() {
-    panic!("I_ShutdownGraphics unimplemented");
-}
-
-#[no_mangle]
 extern "C" fn exit(_: i32) {
     panic!("exit unimplemented");
 }
@@ -215,6 +230,7 @@ extern "C" fn __stdio_close() {
     panic!("__stdio_close unimplemented");
 }
 
+// Implemented in libC
 // #[no_mangle]
 // extern "C" fn __stdio_write() {
 //     panic!("__stdio_write unimplemented");
@@ -330,7 +346,12 @@ extern "C" fn lseek(_: i32, _: i64, _: i32) -> i64 {
 
 
 fn main() {
-    log!("Hello, {}! Answer={} ({:b} in binary)", "World, from JS Console", 42, 42);
+    log!(
+        "Hello, {}! Answer={} ({:b} in binary)", 
+        "World, from JS Console", 
+        42, 
+        42
+    );
 
     std::panic::set_hook(Box::new(|panic_info| {
         log!("PANIC!!");
@@ -342,7 +363,7 @@ fn main() {
             Some(l) => format!("in file '{}' at line {}", l.file(), l.line()),
             None => String::from("but can't get location information..."),
         };
-        log!("panic occurred: \"{}\" {}", p, l);
+        log!("panic occurred: \"{}\" {}\n{:?}", p, l, panic_info);
     }));
 
     println!("Hello, world from rust!");
