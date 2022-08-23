@@ -121,6 +121,17 @@ extern "C" fn access(pathname: *const c_char, mode: c_int) -> c_int {
     }
 }
 
+#[no_mangle]
+extern "C" fn fopen(pathname: *const c_char, mode: c_int) -> i32 /* FILE* */ {
+    let pathname = unsafe { CStr::from_ptr(pathname).to_str().expect("invalid UTF8") };
+
+    if pathname == "/home/doom/.doomrc" {
+        return 0; // NULL for error
+    }
+
+    panic!("fopen({}, {}) unimplemented", pathname, mode);
+}
+
 
 // generated
 
@@ -222,11 +233,6 @@ extern "C" fn __lock(_: i32) {
 #[no_mangle]
 extern "C" fn __unlock(_: i32) {
     panic!("__unlock unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn fopen(_: i32, _: i32) -> i32 {
-    panic!("fopen unimplemented");
 }
 
 #[no_mangle]
