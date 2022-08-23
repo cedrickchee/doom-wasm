@@ -4,6 +4,7 @@ linuxdoom
 *.o
 *.wad
 _*.txt
+*.wasm
 
 # Added by cargo
 
