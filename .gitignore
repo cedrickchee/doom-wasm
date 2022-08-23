@@ -5,6 +5,7 @@ linuxdoom
 *.wad
 _*.txt
 *.wasm
+dev_log.md
 
 # Added by cargo
 
