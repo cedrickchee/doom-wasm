@@ -104,6 +104,23 @@ extern "C" fn ___errno_location() -> *const c_int {
     unsafe { &single_thread_errno }
 }
 
+#[no_mangle]
+extern "C" fn access(pathname: *const c_char, mode: c_int) -> c_int {
+    const ENOENT: c_int = 2;
+
+    let pathname = unsafe { CStr::from_ptr(pathname).to_str().expect("invalid UTF8") };
+    match pathname {
+        "./doom2f.wad" => ENOENT,
+        "./doom2.wad" => ENOENT,
+        "./plutonia.wad" => ENOENT,
+        "./tnt.wad" => ENOENT,
+        "./doom.wad" => ENOENT,
+        "./doomu.wad" => ENOENT,
+        "./doom1.wad" => ENOENT, // TODO this file should exist.
+        _ => panic!("access({}, {}) unimplemented", pathname, mode),
+    }
+}
+
 
 // generated
 
@@ -225,11 +242,6 @@ extern "C" fn I_StartFrame() {
 #[no_mangle]
 extern "C" fn I_StartTic() {
     panic!("I_StartTic unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn access(_: i32, _: i32) -> i32 {
-    panic!("access unimplemented");
 }
 
 #[no_mangle]
