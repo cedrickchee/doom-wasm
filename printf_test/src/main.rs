@@ -54,6 +54,11 @@ extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
     return -1;
 }
 
+#[no_mangle]
+extern "C" fn __stdout_write() {
+    panic!("__stdout_write unimplemented");
+}
+
 fn main() {
     std::panic::set_hook(Box::new(|panic_info| {
         log!("PANIC!!");
