@@ -95,7 +95,38 @@
 
       WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
         .then(obj => {
+          // Initialize.
           obj.instance.exports.main();
+
+          // Respond to keyboard input.
+          //
+          // Register JavaScript event listeners for key presses and insert the
+          // corresponding key code into Doom's event queue.
+
+          let doomKeyCode = function(keyCode) {
+            // Doom seems to use mostly the same keycodes, except for the following (maybe I'm missing a few.)
+            switch (keyCode) {
+              case 8:
+                return 127; // KEY_BACKSPACE
+              case 37:
+                return 0xac; // KEY_LEFTARROW
+              case 38:
+                return 0xad; // KEY_UPARROW
+              case 39:
+                return 0xae;0xae // KEY_RIGHTARROW // KEY_RIGHTARROW
+              case 40:
+                return 0xaf; // KEY_DOWNARROW
+              default:
+                return keyCode;
+            }
+          };
+
+          document.addEventListener('keydown', function(event) {
+            obj.instance.exports.add_browser_event(0 /*KeyDown*/, doomKeyCode(event.keyCode));
+          });
+          document.addEventListener('keyup', function(event) {
+            obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
+          });
 
           // We've change Doom source code such that Doom itself is not looping,
           // but we can call the loop here via `window.requestAnimationFrame()`.
