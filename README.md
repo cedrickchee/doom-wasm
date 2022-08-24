@@ -50,3 +50,9 @@ screen of Doom rendered. Awesome!
 Doom rendering broken colors, but can read text:
 
 ![Doom rendering broken colors, but can read text](./docs/images/doom_screen_broken_colors_but_can_read_text.png)
+
+Start screen rendering correctly on an HTML5 canvas:
+
+We mapped Doom's X11 ColorMap to canvas's RGBA color:
+
+![Doom's title screen](./docs/images/doom_titlescreen_html5.png)
