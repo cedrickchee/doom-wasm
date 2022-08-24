@@ -38,11 +38,6 @@ fn main() {
     println!("cargo:rustc-link-search={}/build", LIBGCC_SRC);
     println!("cargo:rustc-link-lib=clang_rt.builtins-wasm32");
 
-    // Temporarily use pre-compiled library from https://00f.net/2019/04/07/compiling-to-webassembly-with-llvm-and-clang/
-    // TODO built myself!
-    // println!("cargo:rustc-link-search=foo");
-    // println!("cargo:rustc-link-lib=clang_rt.builtins-wasm32");
-
     // Original Doom sources
     println!("cargo:rerun-if-changed={}", DOOM_SRC);
     let status = Command::new("make")
