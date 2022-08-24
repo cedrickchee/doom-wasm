@@ -46,3 +46,7 @@ Dat feel! After so much theory and no way to test. Finally seeing the first
 screen of Doom rendered. Awesome!
 
 ![Doom rendering the first screen to an HTML5 canvas](./docs/images/doom_first_screen_renders_to_canvas.png)
+
+Doom rendering broken colors, but can read text:
+
+![Doom rendering broken colors, but can read text](./docs/images/doom_screen_broken_colors_but_can_read_text.png)

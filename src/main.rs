@@ -222,6 +222,11 @@ extern "C" {
 
 #[link(wasm_import_module = "js")]
 extern "C" {
+    // ptr points to a SCREENWIDTH*SCREENHEIGHT array.
+    // Each byte represents one 256-color PseudoColor Pixel.
+    // In other words, each byte doesn't directly correspond to any color.
+    // Instead, they refer to an entry in an X11 Colormap.
+    // This Colormap maps the 256 possible bytes to one RGB color.
     fn js_draw_screen(ptr: *const u8);
 }
 
