@@ -19,9 +19,26 @@
         console.log(string);
       }
 
+      // Implement libC `gettimeofday`.
+      //
+      // This is one of the few functions where we need support from JavaScript,
+      // since WebAssembly does not know about the date or about wall-clock
+      // timers in general.
+      //
+      // Doom uses `gettimeofday` to compute when its "ticks" are happening, so
+      // the game runs at the same speed on slow as well as on fast hardware.
+      function  GetTimeOfDay(ptr) {
+        var timeval = new Uint32Array(memory.buffer, ptr, 2);
+        // TODO: maybe wait for animation frame?
+        let t = new Date();
+        timeval[0] = t.getSeconds();
+        timeval[1] = t.getMilliseconds() * 1000; // as usec YOLO;
+      }
+
       var importObject = {
         js: {
-          console_log: consoleLogString
+          console_log: consoleLogString,
+          js_timeofday: GetTimeOfDay,
         },
         env: {
           memory: memory
