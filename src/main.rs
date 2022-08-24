@@ -1,5 +1,5 @@
+use std::ffi::CStr;
 use std::ffi::CString;
-use std::ffi::{CStr};
 use std::os::raw::{c_char, c_int, c_long};
 
 #[allow(non_camel_case_types)]
@@ -43,7 +43,8 @@ static HOME_ENV: &'static [u8; 11] = b"/home/doom\0"; // C string, terminate wit
 // Called by d_main.c where D_DoomMain is
 // Resolved Doom error "Please set $HOME to your home directory"
 #[no_mangle]
-extern "C" fn getenv(name: *const c_char) -> *const c_char { //TODO returning an ffi-safe Option<non-nullable> would be cool!!
+extern "C" fn getenv(name: *const c_char) -> *const c_char {
+    //TODO returning an ffi-safe Option<non-nullable> would be cool!!
     // TODO type!!!
     let name = unsafe { CStr::from_ptr(name) };
     let name = name.to_str().expect("invalid UTF8 getenv call");
@@ -155,14 +156,12 @@ extern "C" fn I_ShutdownGraphics() {
     log!("Bye!! TODO: implement I_ShutdownGraphics");
 }
 
-
 // struct timeval { time_t tv_sec; suseconds_t tv_usec; };
 #[repr(C)]
 struct Timeval {
     tv_sec: c_long, // TODO is this i32 or i64??
     tv_usec: c_long,
 }
-
 
 #[link(wasm_import_module = "js")]
 extern "C" {
@@ -173,7 +172,7 @@ extern "C" {
 extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
     // timezone is obsolete and should not be needef for doom.
     let tv = match unsafe { tv.as_mut() } {
-        None => return 0 /*do nothing*/ ,
+        None => return 0, /*do nothing*/
         Some(tv) => tv,
     };
 
@@ -181,7 +180,6 @@ extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
     log!("gettimeofday slightly unimplemented (TODO: required for Doom's ticks)");
     0 // success
 }
-
 
 #[no_mangle]
 extern "C" fn I_InitGraphics() {
@@ -241,7 +239,7 @@ extern "C" fn I_FinishUpdate() {
     //
     // I think only screens[0] is needed.
     // The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
-    // 
+    //
     // Two screen buffers because we're doing double buffering?
     unsafe {
         let the_screen = screens[0];
@@ -257,9 +255,9 @@ extern "C" fn I_ReadScreen(_: i32) {
 
 fn main() {
     log!(
-        "Hello, {}! Answer={} ({:b} in binary)", 
-        "World, from JS Console", 
-        42, 
+        "Hello, {}! Answer={} ({:b} in binary)",
+        "World, from JS Console",
+        42,
         42
     );
 

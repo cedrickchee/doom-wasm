@@ -11,7 +11,7 @@ fn main() {
         .args(&["-C", LIBC_SRC, "lib/libc.a"])
         .status()
         .expect("failed to start musl libc make");
-    if !status.success(){
+    if !status.success() {
         panic!("Failed to make: {}", status);
     }
     println!("cargo:rustc-link-search={}/lib/", LIBC_SRC);
@@ -22,7 +22,7 @@ fn main() {
         .args(&["-C", LIBC_SRC, "install-headers"])
         .status()
         .expect("failed to start musl libc install-headers make");
-    if !status.success(){
+    if !status.success() {
         panic!("Failed to make: {}", status);
     }
 
@@ -32,7 +32,7 @@ fn main() {
         .args(&["-C", LIBGCC_SRC, "build/libclang_rt.builtins-wasm32.a"])
         .status()
         .expect("failed to start compiler_rt make");
-    if !status.success(){
+    if !status.success() {
         panic!("Failed to make: {}", status);
     }
     println!("cargo:rustc-link-search={}/build", LIBGCC_SRC);
@@ -49,7 +49,7 @@ fn main() {
         .args(&["-C", DOOM_SRC, "linux/liblinuxxdoom.a"])
         .status()
         .expect("failed to start doom make");
-    if !status.success(){
+    if !status.success() {
         panic!("Failed to make: {}", status);
     }
     println!("cargo:rustc-link-search={}/linux", DOOM_SRC);
