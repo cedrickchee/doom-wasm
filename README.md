@@ -69,3 +69,16 @@ call the loop via `window.requestAnimationFrame()`.
 
 This somehow inverses control and gives the browser a chance to render the
 frames.
+
+## Project Structure
+
+A summary of the directory structure:
+- `build.rs`: Rust build script. Tells the rust compiler to build and link to
+  our small libc, compiler runtime, and doom library.
+- `clang_compiler_rt`: C compiler runtime, to compile as static archive.
+- `musl-1.2.2`: libc for C string functions, to compile as static archive.
+- `linuxdoom-1.10`: original doom sources, to compile as static archive.
+- `doom1.wad`: Doom game file.
+- `src`: Rust sources.
+- `index.html`: HTML and Javascript to load the compiled WebAssembly and provide
+  keyboard input and HTML5 canvas rendering output.
