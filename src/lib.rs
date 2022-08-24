@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate lazy_static;
 
+mod gamefile;
 pub mod js_imports;
 mod malloc;
 mod printf;
 mod unimplemented_libc;
+mod video;
 
 #[macro_export]
 macro_rules! log {
