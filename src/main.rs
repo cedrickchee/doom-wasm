@@ -18,12 +18,6 @@ extern "C" {
     static mut myargv: *const *const u8; // switched from `c_char` to `u8`
 }
 
-// Called in JavaScript
-#[no_mangle]
-pub extern "C" fn doom_loop_step() {
-    unsafe { D_DoomLoop_loop() };
-}
-
 // Macros to print to JavaScript Console.
 use xdoom::{log, println};
 
@@ -104,6 +98,12 @@ fn main() {
     unsafe {
         myargc = SAFE_ARGV.len() as c_int;
         myargv = make_c_argv();
-        D_DoomMain()
+        D_DoomMain();
     };
+}
+
+// Called in JavaScript
+#[no_mangle]
+pub extern "C" fn doom_loop_step() {
+    unsafe { D_DoomLoop_loop() };
 }
