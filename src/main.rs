@@ -1,5 +1,5 @@
 use std::ffi::CString;
-use std::ffi::{CStr, c_void};
+use std::ffi::{CStr};
 use std::os::raw::{c_char, c_int};
 
 #[allow(non_camel_case_types)]
