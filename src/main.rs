@@ -52,24 +52,24 @@ extern "C" fn fabsl(_: i32, _: i64, _: i64) {
     panic!("fabsl unimplemented");
 }
 
-static HOME_ENV: &'static [u8; 11] = b"/home/doom\0"; // C string, terminate with \0!
+static HOME_ENV: &'static [u8; 11] = b"/home/doom\0"; // C string, terminate with \0! //TODO: use CStr safely here?
 
 // Called by d_main.c where D_DoomMain is
 // Resolved Doom error "Please set $HOME to your home directory"
 #[no_mangle]
-extern "C" fn getenv(name: *const c_char) -> Option<&'static [u8; 11]> {
+extern "C" fn getenv(name: *const c_char) -> *const c_char { //TODO returning an ffi-safe Option<non-nullable> would be cool!!
     // TODO type!!!
     let name = unsafe { CStr::from_ptr(name) };
     let name = name.to_str().expect("invalid UTF8 getenv call");
     log!("name: {}", name);
     let result = match name {
-        "DOOMWADDIR" => None,
+        "DOOMWADDIR" => std::ptr::null(),
         // this line is important to make Doom successfully not starting because
         // no WAD is available and not because of other problems.
-        "HOME" => Some(HOME_ENV),
+        "HOME" => HOME_ENV.as_ptr() as *const c_char,
         _ => {
             log!("unexepcted getenv({:?}) call", name);
-            None
+            std::ptr::null()
         }
     };
     result
