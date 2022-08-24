@@ -129,7 +129,7 @@ extern "C" fn open(pathname: *const c_char, flags: c_int, mode: i32) -> i32 {
 #[no_mangle]
 extern "C" fn read(fd: c_int, buf: *mut u8 /*TODO is c_char*/, count: usize) -> isize {
     if fd == DOOM1_WAD_FD {
-        log!("read - count: {}", count);
+        // log!("read - count: {}", count);
 
         //TODO read DOOM1_WAD and advance seek
         let buf = unsafe { std::slice::from_raw_parts_mut(buf, count) };
@@ -151,7 +151,7 @@ extern "C" fn lseek(fd: i32, offset: i64, whence: c_int) -> i64 {
     if fd == DOOM1_WAD_FD {
         match whence {
             SEEK_SET => {
-                log!("lseek - fd: {}, whence: {}", DOOM1_WAD_FD, whence);
+                // log!("lseek - fd: {}, whence: {}", DOOM1_WAD_FD, whence);
                 unsafe { DOOM1_WAD_SEEKER = offset as usize };
                 return unsafe { DOOM1_WAD_SEEKER } as i64;
             }
