@@ -16,7 +16,7 @@ xdoom.wasm: src/*.rs clang_compiler_rt/* linuxdoom-1.10/*  musl-1.2.2/*
 	$(wasm-opt) -O3 -o xdoom.wasm ${BUILDDIR}/xdoom.wasm
 
 run_wasm: xdoom.wasm
-	ls xdoom.wasm index.html | $(entr) -r python3 -m http.server --bind 127.0.0.1 8080
+	ls xdoom.wasm index.html main.js | $(entr) -r python3 -m http.server --bind 127.0.0.1 8080
 
 clean:
 	cargo clean
