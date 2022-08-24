@@ -27,8 +27,8 @@
     <h1>DooM</h1>
     <p>A wasm32 port of 1997 linuxdoom-1.10 with minimal modifications to the <a href="https://github.com/id-Software/DOOM">sources</a>.</p>
     <canvas id="screen" width="320" height="200">This is where the DooM screen should render.</canvas><br>
-    number of gettimeofday calls: <span id="gettimeofday_stats">0</span><br>
-    FPS: <span id="fps_stats">0</span> Total Frames drawn: <span id="drawframes_stats">0</span><br>
+    gettmilliseconds calls per second: <span id="getmsps_stats">0</span> Total getmilliseconds calls: <span id="getms_stats">0</span><br>
+    FPS: <span id="fps_stats">0</span> (target: 35FPS) Total Frames drawn: <span id="drawframes_stats">0</span><br>
     <div id="output"></div>
 
     <script>
@@ -58,7 +58,16 @@
         }
       }
 
-      const gettimeofday_stats = document.getElementById("gettimeofday_stats");
+      const getmsps_stats = document.getElementById("getmsps_stats");
+      const getms_stats = document.getElementById("getms_stats");
+      var getms_calls_total = 0;
+      var getms_calls = 0; // in current second
+      window.setInterval(function() {
+          getms_calls_total += getms_calls;
+          getmsps_stats.innerText = getms_calls/1000 + "k";
+          getms_stats.innerText = getms_calls_total;
+          getms_calls = 0;
+      }, 1000);
 
       // Implement libC `gettimeofday`.
       //
@@ -68,16 +77,22 @@
       //
       // Doom uses `gettimeofday` to compute when its "ticks" are happening, so
       // the game runs at the same speed on slow as well as on fast hardware.
-      function  getTimeOfDay(ptr) {
-        gettimeofday_stats.innerText = parseInt(gettimeofday_stats.innerText) + 1;
-        var timeval = new Uint32Array(memory.buffer, ptr, 2);
-        // TODO: maybe wait for animation frame or make more efficient? Doom polls this quite often!
-        // Since Doom does not really care about the absolute wall clock, but
-        // only wants time differences, maybe window.performance.now() would be
-        // better here??
-        const t = new Date();
-        timeval[0] = t.getSeconds();
-        timeval[1] = t.getMilliseconds() * 1000; // as usec YOLO; Doom wants 1/70th second tics, so we should be fine.
+
+      // function  getTimeOfDay(ptr) {
+      //   gettimeofday_stats.innerText = parseInt(gettimeofday_stats.innerText) + 1;
+      //   var timeval = new Uint32Array(memory.buffer, ptr, 2);
+      //   // TODO: maybe wait for animation frame or make more efficient? Doom polls this quite often!
+      //   // Since Doom does not really care about the absolute wall clock, but
+      //   // only wants time differences, maybe window.performance.now() would be
+      //   // better here??
+      //   const t = new Date();
+      //   timeval[0] = t.getSeconds();
+      //   timeval[1] = t.getMilliseconds() * 1000; // as usec YOLO; Doom wants 1/70th second tics, so we should be fine.
+      // }
+
+      function getMilliseconds() {
+        ++getms_calls;
+        return performance.now();
       }
 
       // Show more stats such as FPS
@@ -116,7 +131,7 @@
       var importObject = {
         js: {
           console_log: consoleLogString,
-          js_timeofday: getTimeOfDay,
+          js_milliseconds_since_start: getMilliseconds,
           js_draw_screen: drawCanvas,
         },
         env: {

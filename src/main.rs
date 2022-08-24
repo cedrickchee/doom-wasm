@@ -27,28 +27,36 @@ extern "C" fn ___errno_location() -> *const c_int {
     unsafe { &SINGLE_THREAD_ERRNO }
 }
 
-// struct timeval { time_t tv_sec; suseconds_t tv_usec; };
-#[repr(C)]
-struct Timeval {
-    tv_sec: c_long, // TODO is this i32 or i64??
-    tv_usec: c_long,
-}
-
 #[link(wasm_import_module = "js")]
 extern "C" {
-    fn js_timeofday(ptr: *mut Timeval);
+    // i32 timestamps in milliseconds should be enough for over 500hours of Doom.
+    fn js_milliseconds_since_start() -> i32;
 }
 
-// required for Doom's ticks
+//
+// Implement I_GetTime from C code.
+// Doom code comment says: returns time in 1/70th second tics.
+// But it's actually more like 1/35 second tics, i.e. optimized for 35FPS
+// I.e. one tic every 28.572ms.
+// Returns a monotonically increasing number of ticks.
+//
 #[no_mangle]
-extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
-    // timezone is obsolete and should not be needef for doom.
-    let tv = match unsafe { tv.as_mut() } {
-        None => return 0, /*do nothing*/
-        Some(tv) => tv,
+extern "C" fn I_GetTime() -> c_int {
+    const TICRATE: c_int = 32;
+
+    let ms = unsafe { js_milliseconds_since_start() };
+
+    // Basically, there should be no need to record a basetime,
+    // since performance.now() shold roughly start at 0.
+    static mut BASETIME: c_int = 0;
+    let base = unsafe {
+        if BASETIME == 0 {
+            BASETIME = ms;
+            crate::log!("BASETIME initialized to {}", BASETIME);
+        }
+        BASETIME
     };
-    unsafe { js_timeofday(tv) };
-    0 // success
+    (ms-base)*TICRATE/1000
 }
 
 lazy_static! {
