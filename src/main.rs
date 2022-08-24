@@ -39,6 +39,7 @@ extern "C" {
     fn js_timeofday(ptr: *mut Timeval);
 }
 
+// required for Doom's ticks
 #[no_mangle]
 extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
     // timezone is obsolete and should not be needef for doom.
@@ -46,9 +47,7 @@ extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
         None => return 0, /*do nothing*/
         Some(tv) => tv,
     };
-
     unsafe { js_timeofday(tv) };
-    log!("gettimeofday slightly unimplemented (TODO: required for Doom's ticks)");
     0 // success
 }
 
