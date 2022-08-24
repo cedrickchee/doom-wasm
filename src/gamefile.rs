@@ -94,8 +94,8 @@ extern "C" fn read(fd: c_int, buf: *mut u8 /*TODO is c_char*/, count: usize) -> 
 #[no_mangle]
 extern "C" fn lseek(fd: i32, offset: i64, whence: c_int) -> i64 {
     const SEEK_SET: c_int = 0;
-    const SEEK_CUR: c_int = 1;
-    const SEEK_END: c_int = 2;
+    // const SEEK_CUR: c_int = 1;
+    // const SEEK_END: c_int = 2;
     if fd == DOOM1_WAD_FD {
         match whence {
             SEEK_SET => {
