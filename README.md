@@ -39,3 +39,10 @@ minimal version myself.
 Get https://github.com/llvm/llvm-project/
 `llvm-project/compiler-rt/lib/builtins` sources and compile myself. No need for
 arch I hope, no assembly to be emitted. But using git tag `llvmorg-11.1.0`.
+
+---
+
+Dat feel! After so much theory and no way to test. Finally seeing the first
+screen of Doom rendered. Awesome!
+
+![Doom rendering the first screen to an HTML5 canvas](./docs/images/doom_first_screen_renders_to_canvas.png)
