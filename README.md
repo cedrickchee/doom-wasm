@@ -56,3 +56,16 @@ Start screen rendering correctly on an HTML5 canvas:
 We mapped Doom's X11 ColorMap to canvas's RGBA color:
 
 ![Doom's title screen](./docs/images/doom_titlescreen_html5.png)
+
+---
+
+If I don't make `I_FinishUpdate` `panic!()`, then Doom runs in its infinite game
+loop. Unfortunately, this runs at 100% CPU, Firefox complains that a website is
+misbehaving, and nothing is rendered, since the browser has no chance of drawing
+the animation.
+
+Probably, I want to change Doom such that doom itself is not looping, but I can
+call the loop via `window.requestAnimationFrame()`.
+
+This somehow inverses control and gives the browser a chance to render the
+frames.

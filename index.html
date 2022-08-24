@@ -44,7 +44,7 @@
       const doom_screen_height = 200;
 
       function DrawCanvas(ptr) {
-        console.log("DrawCanvas - ptr:", ptr);
+        // console.log("DrawCanvas - ptr:", ptr);
         var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
         var ctx = canvas.getContext('2d');
         var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
@@ -72,6 +72,14 @@
       WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
         .then(obj => {
           obj.instance.exports.main();
+
+          // We've change Doom source code such that Doom itself is not looping,
+          // but we can call the loop here via `window.requestAnimationFrame()`.
+          function step(timestamp) {
+            obj.instance.exports.doom_loop_step();
+            window.requestAnimationFrame(step);
+          }
+          window.requestAnimationFrame(step);
         });
     </script>
   </body>

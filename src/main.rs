@@ -7,11 +7,18 @@ pub type c_long_double = ::std::os::raw::c_double; //?
 // C libraries
 extern "C" {
     // d_main.c
-    fn D_DoomMain() -> !;
+    fn D_DoomMain();
+    fn D_DoomLoop_loop();
 
     // m_argv.c
     static mut myargc: c_int;
     static mut myargv: *const *const c_char;
+}
+
+// Called in JavaScript
+#[no_mangle]
+pub extern "C" fn doom_loop_step() {
+    unsafe { D_DoomLoop_loop() };
 }
 
 // Macros to print to JavaScript Console.
