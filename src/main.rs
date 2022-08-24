@@ -99,7 +99,7 @@ fn main() {
         log!("panic occurred: \"{}\" {}\n{:?}", p, l, panic_info);
     }));
 
-    println!("Hello, world from rust! (println! working)");
+    println!("Hello, world from rust! 🦀 (println! working)");
 
     // TODO: better set global variables and keep them alive forever.
     unsafe {

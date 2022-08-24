@@ -20,6 +20,16 @@
         display: flex;
         flex-direction: column-reverse;
       }
+      #output span.log {
+        color:darkslateblue;
+      }
+      #output span.stdout {
+        color: black;
+      }
+      #output span.stderr {
+        font-weight: bold;
+        color:brown;
+      }
 
       .container {
         display: flex;
@@ -51,19 +61,24 @@
       }
 
       function consoleLogString(offset, length) {
-        var string = readWasmString(offset, length);
+        const string = readWasmString(offset, length);
         console.log("\"" + string + "\"");
+      }
 
-        const lines = string.split('\n');
-        for (var i=0; i<lines.length; ++i) {
-          if (lines[i].length == 0) {
-            continue;
+      function appendOutput(style) {
+        return function(offset, length) {
+          const lines = readWasmString(offset, length).split('\n');
+          for (var i=0; i<lines.length; ++i) {
+            if (lines[i].length == 0) {
+              continue;
+            }
+            var t = document.createElement("span");
+            t.classList.add(style);
+            t.appendChild(document.createTextNode(lines[i]));
+            output.appendChild(t);
+            output.appendChild(document.createElement("br"));
+            t.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"}); /*smooth scrolling is experimental according to MDN*/
           }
-          var t = document.createElement("span");
-          t.appendChild(document.createTextNode(lines[i]));
-          output.appendChild(t);
-          output.appendChild(document.createElement("br"));
-          t.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"}); /*smooth scrolling is experimental according to MDN*/
         }
       }
 
@@ -139,7 +154,9 @@
 
       var importObject = {
         js: {
-          console_log: consoleLogString,
+          js_console_log: appendOutput("log"),
+          js_stdout: appendOutput("stdout"),
+          js_stderr: appendOutput("stderr"),
           js_milliseconds_since_start: getMilliseconds,
           js_draw_screen: drawCanvas,
         },

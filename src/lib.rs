@@ -12,7 +12,7 @@ mod video;
 macro_rules! log {
     ($($arg:tt)*) => {
         let __the_log_str = format!( $( $arg )* );
-        unsafe { $crate::js_imports::console_log(__the_log_str.as_ptr(), __the_log_str.len()) }
+        unsafe { $crate::js_imports::js_console_log(__the_log_str.as_ptr(), __the_log_str.len()) }
     }
 }
 
