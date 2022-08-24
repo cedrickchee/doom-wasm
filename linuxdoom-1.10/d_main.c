@@ -795,8 +795,11 @@ void FindResponseFile (void)
 //
 void D_DoomMain (void)
 {
+	// The following three lines were added during porting to wasm for debugging
+	// purpose.
 	puts("Starting D_DoomMain");
 	printf("Triggering a printf\n");
+	printf("Doom's screen is %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
 
     int             p;
     char                    file[256];
