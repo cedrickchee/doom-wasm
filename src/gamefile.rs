@@ -2,7 +2,7 @@ use std::ffi::CStr;
 use std::os::raw::{c_char, c_int};
 
 // Macros to print to JavaScript Console.
-use crate::{log};
+use crate::log;
 
 const DOOM1_WAD_FD: c_int = 42; // file descriptor for openend ./doom1.wad
 static DOOM1_WAD: &[u8; 4196020] = include_bytes!("../doom1.wad");

@@ -56,7 +56,7 @@ extern "C" fn I_GetTime() -> c_int {
         }
         BASETIME
     };
-    (ms-base)*TICRATE/1000
+    (ms - base) * TICRATE / 1000
 }
 
 lazy_static! {
