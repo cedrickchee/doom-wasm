@@ -17,8 +17,6 @@
         font-family: monospace, serif;
         font-size: 10px;
         overflow-y: scroll;
-        display: flex;
-        flex-direction: column-reverse;
       }
       #output span.log {
         color:darkslateblue;
@@ -41,7 +39,7 @@
     <h1>DooM</h1>
     <p>A wasm32 port of 1997 linuxdoom-1.10 with minimal modifications to the <a href="https://github.com/id-Software/DOOM">sources</a>.</p>
     <p>Use enter to start the game, arrow keys to move, ctrl to shoot, spacebar to open gates. No mobile touch input supported right now.</p>
-    <div class="container"></div>
+    <div class="container">
       <canvas id="screen" width="640" height="400">This is where the DooM screen should render.</canvas>
       <span>&nbsp;</span>
       <div id="output"></div>
