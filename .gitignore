@@ -1,0 +1,5 @@
+linuxdoom-1.10/linux
+
+linuxdoom
+*.o
+*.wad
