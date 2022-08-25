@@ -108,6 +108,28 @@ to render its 60 animation frames per second and the system is mostly idle
 otherwise. I can clearly hear the difference, since my CPU fan is no longer
 spinning up when starting Doom.
 
+**Canvas**
+
+Copy video bufer one time less.
+
+Before:
+
+```javascript
+var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
+var ctx = canvas.getContext('2d');
+var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
+```
+
+After:
+```javascript
+var doom_screen = new Uint8ClampedArray(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
+var render_screen = new ImageData(doom_screen, doom_screen_width, doom_screen_height);
+var ctx = canvas.getContext('2d');
+```
+
+Chrome and Firefox Dev tools confirm that this makes the game run at least twice
+as efficient.
+
 ### WebAssembly Specific Optimizations
 
 I want to enable full optimization of the whole wasm binary.
