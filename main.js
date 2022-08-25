@@ -1,6 +1,8 @@
 'use strict';
 var memory = new WebAssembly.Memory({ initial : 108 });
 
+// stdout and stderr goes here
+
 const output = document.getElementById("output");
 
 function readWasmString(offset, length) {
@@ -30,6 +32,7 @@ function appendOutput(style) {
   }
 }
 
+// Stats about how often doom polls the time.
 const getmsps_stats = document.getElementById("getmsps_stats");
 const getms_stats = document.getElementById("getms_stats");
 var getms_calls_total = 0;
@@ -87,11 +90,11 @@ const doom_screen_height = 200*2;
 
 function drawCanvas(ptr) {
   // console.log("drawCanvas - ptr:", ptr);
-  var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
+  var doom_screen = new Uint8ClampedArray(memory.buffer, ptr, doom_screen_width*doom_screen_height*4)
+  var render_screen = new ImageData(doom_screen, doom_screen_width, doom_screen_height)
   var ctx = canvas.getContext('2d');
-  var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
 
-  for (var i=0; i < doom_screen_width*doom_screen_height*4; ++i) {
+  for (var i=0; i < render_screen.data.length; ++i) {
     render_screen.data[i] = doom_screen[i]; // Is there some memcpy in JS?
   }
 
@@ -102,6 +105,9 @@ function drawCanvas(ptr) {
 
 // WebAssembly specific stuffs
 
+// These functions will be available in WebAssembly. We also share the memory to
+// share larger amounts of data with javascript, e.g. strings of the video
+// output.
 var importObject = {
   js: {
     js_console_log: appendOutput("log"),
@@ -117,10 +123,10 @@ var importObject = {
 
 WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
   .then(obj => {
-    // Initialize.
+    // Initialize Doom.
     obj.instance.exports.main();
 
-    // Respond to keyboard input.
+    // Input handling
     //
     // Register JavaScript event listeners for key presses and insert the
     // corresponding key code into Doom's event queue.
@@ -153,12 +159,51 @@ WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
       }
     };
 
-    document.addEventListener('keydown', function(event) {
-      obj.instance.exports.add_browser_event(0 /*KeyDown*/, doomKeyCode(event.keyCode));
+    let keyDown = function(keyCode) {obj.instance.exports.add_browser_event(0 /*KeyDown*/, keyCode);};
+    let keyUp = function(keyCode) {obj.instance.exports.add_browser_event(1 /*KeyUp*/, keyCode);};
+
+    // Respond to keyboard input.
+    canvas.addEventListener('keydown', function(event) {
+      keyDown(doomKeyCode(event.keyCode));
+      event.preventDefault();
+    }, false);
+    canvas.addEventListener('keyup', function(event) {
+      keyUp(doomKeyCode(event.keyCode));
+      event.preventDefault();
+    }, false);
+
+    // Mobile touch input
+    [["enterButton", 13],
+     ["leftButton", 0xac],
+     ["rightButton", 0xae],
+     ["upButton", 0xad],
+     ["downButton", 0xaf],
+     ["ctrlButton", 0x80+0x1d],
+     ["spaceButton", 32],
+     ["altButton", 0x80+0x38]].forEach(([elementID, keyCode]) => {
+        console.log(elementID + " for " + keyCode);
+        var button = document.getElementById(elementID);
+        //button.addEventListener("click", () => {keyDown(keyCode); keyUp(keyCode)} );
+        button.addEventListener("touchstart", () => keyDown(keyCode));
+        button.addEventListener("touchend", () => keyUp(keyCode));
+        button.addEventListener("touchcancel", () => keyUp(keyCode));
     });
-    document.addEventListener('keyup', function(event) {
-      obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
-    });
+
+    // Hint that the canvas should have focus to capute keyboard events.
+    const focushint = document.getElementById("focushint");
+    const printFocusInHint = function(e) {
+      focushint.innerText = "Keyboard events will be captured as long as the the DOOM canvas has focus.";
+      focushint.style.fontWeight = "normal";
+    };
+    canvas.addEventListener('focusin', printFocusInHint, false);
+
+    canvas.addEventListener('focusout', function(e) {
+      focushint.innerText = "Click on the canvas to capute input and start playing.";
+      focushint.style.fontWeight = "bold";
+    }, false);
+
+    canvas.focus();
+    printFocusInHint();
 
     const animationfps_stats = document.getElementById("animationfps_stats");
     var number_of_animation_frames = 0; // in current second

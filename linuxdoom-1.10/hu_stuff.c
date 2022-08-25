@@ -522,6 +522,7 @@ void HU_Ticker(void)
 	if ((plr->message && !message_nottobefuckedwith)
 	    || (plr->message && message_dontfuckwithme))
 	{
+        puts(plr->message); // web modification for wasm port: show game messages on stdout
 	    HUlib_addMessageToSText(&w_message, 0, plr->message);
 	    plr->message = 0;
 	    message_on = true;
