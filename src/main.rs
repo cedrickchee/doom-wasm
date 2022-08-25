@@ -42,7 +42,7 @@ extern "C" {
 //
 #[no_mangle]
 extern "C" fn I_GetTime() -> c_int {
-    const TICRATE: c_int = 32;
+    const TICRATE: c_int = 35;
 
     let ms = unsafe { js_milliseconds_since_start() };
 
