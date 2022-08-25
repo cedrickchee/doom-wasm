@@ -82,3 +82,32 @@ A summary of the directory structure:
 - `src`: Rust sources.
 - `index.html`: HTML and Javascript to load the compiled WebAssembly and provide
   keyboard input and HTML5 canvas rendering output.
+
+## Optimizations
+
+There is more to optimize for web-native performance.
+
+The firefox performance profiler says we spend most of our time in
+`gettimeofday`. In
+[b1eab74](https://github.com/cedrickchee/wasm-doom/commit/b1eab74c60776ced95a28d305a16103a0e23c8e7),
+we remove this implementation completely, avoiding the need to construct a
+`Date` object in javascript and avoiding sedond and microsecond translation,
+since Doom just cares about the milliseconds since the start of the game, which
+happens to be what javascript's `performance.now()` provides.
+
+The game runs at ~35 FPS on my machine, but Chrome performance debugging tools
+still show many dropped frames, since the browser wants to animate at 60 FPS. In
+addition, since Doom is still polling the time to know when it can proceed, this
+is super energy inefficient and gives the browser no room for background tasks,
+such as garbage collection. In
+[a048af0](https://github.com/cedrickchee/wasm-doom/commit/18153c7a048af07a772e54675feb35c349ac0437),
+we make Doom to return immediately when running one step of its game loop if
+there is nothing to do, giving control back to the browser. Now, Doom still runs
+at ~35 FPS (this is what Doom was designed for), but the browser gets a chance
+to render its 60 animation frames per second and the system is mostly idle
+otherwise. I can clearly hear the difference, since my CPU fan is no longer
+spinning up when starting Doom.
+
+---
+
+Now go to https://cedrickchee.github.io/wasm-doom and start shooting monsters!
