@@ -108,6 +108,23 @@ to render its 60 animation frames per second and the system is mostly idle
 otherwise. I can clearly hear the difference, since my CPU fan is no longer
 spinning up when starting Doom.
 
+### WebAssembly Specific Optimizations
+
+I want to enable full optimization of the whole wasm binary.
+
+I would love to use LLVM-supported cross-language C/Rust LTO here, but it looks
+like `wasm-ld-10` does not support this.
+
+The `-plugin-opt` option is not supported by my `wasm-ld-10` (and it looks like
+neither v11 or v12 support it).
+
+As reference, `ld.lld` would support this option. IIUC, LLVM currently does not
+support LTO for wasm?
+
+```Makefile
+wasm-opt -O3 -o doom.wasm ${BUILDDIR}/xdoom.wasm
+```
+
 ---
 
 Now go to https://cedrickchee.github.io/wasm-doom and start shooting monsters!

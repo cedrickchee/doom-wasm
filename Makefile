@@ -12,7 +12,7 @@ xdoom.wasm: src/*.rs clang_compiler_rt/* linuxdoom-1.10/*  musl-1.2.2/*
 	# As log as wasm-ld does not look like it supports LTO for C/Rust
 	# cross-language LTO, binaryen is the best we have. TODO: use
 	# https://doc.rust-lang.org/rustc/linker-plugin-lto.html once it works for
-	# wasm.  
+	# wasm.
 	$(wasm-opt) -O3 -o xdoom.wasm ${BUILDDIR}/xdoom.wasm
 
 run_wasm: xdoom.wasm
