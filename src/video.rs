@@ -91,7 +91,7 @@ struct Palette<'a>(&'a [u8]);
 
 impl<'a> Palette<'a> {
     unsafe fn from(palette: *const u8) -> Self {
-        Palette(std::slice::from_raw_parts(palette, 256*3))
+        Palette(std::slice::from_raw_parts(palette, 256 * 3))
     }
 
     fn into_iter(self) -> PaletteIter<'a> {
@@ -104,7 +104,7 @@ struct PaletteIter<'a>(std::slice::Iter<'a, u8>);
 impl Iterator for PaletteIter<'_> {
     type Item = (u8, u8, u8);
 
-    fn next(&mut self) -> Option<(u8, u8, u8)>{
+    fn next(&mut self) -> Option<(u8, u8, u8)> {
         let r = match self.0.next() {
             Some(r) => *r,
             None => return None,
@@ -124,7 +124,7 @@ impl Iterator for PaletteIter<'_> {
 #[no_mangle]
 extern "C" fn I_SetPalette(palette: *const u8) {
     let palette = unsafe { Palette::from(palette) };
-    let gt = unsafe{ gammatable[usegamma as usize] };
+    let gt = unsafe { gammatable[usegamma as usize] };
     for (i, (r, g, b)) in palette.into_iter().enumerate() {
         let r = gt[r as usize];
         let g = gt[g as usize];
