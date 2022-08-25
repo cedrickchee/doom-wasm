@@ -70,11 +70,13 @@ function getMilliseconds() {
 // Show more stats such as FPS
 const fps_stats = document.getElementById("fps_stats");
 const drawframes_stats = document.getElementById("drawframes_stats");
-var numberOfDraws = 0;
+var number_of_draws_total = 0;
+var number_of_draws = 0; // in current second
 window.setInterval(function() {
-  drawframes_stats.innerText = parseInt(drawframes_stats.innerText) + numberOfDraws;
-  fps_stats.innerText = numberOfDraws;
-  numberOfDraws = 0;
+  number_of_draws_total += number_of_draws;
+  drawframes_stats.innerText = number_of_draws_total;
+  fps_stats.innerText = number_of_draws;
+  number_of_draws = 0;
 }, 1000);
 
 // Render Doom screen
@@ -95,7 +97,7 @@ function drawCanvas(ptr) {
 
   ctx.putImageData(render_screen, 0, 0);
 
-  ++numberOfDraws;
+  ++number_of_draws;
 }
 
 // WebAssembly specific stuffs
