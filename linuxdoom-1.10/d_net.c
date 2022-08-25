@@ -633,7 +633,8 @@ int	oldnettics;
 
 extern	boolean	advancedemo;
 
-void TryRunTics (void)
+// // web modification for wasm port: changed return type
+int TryRunTics (void)
 {
     int		i;
     int		lowtic;
@@ -644,6 +645,11 @@ void TryRunTics (void)
     int		counts;
     int		numplaying;
     
+	// web modification for wasm port: do NOT busy wait for a new tick, return control to browser.
+	if (I_GetTime()/ticdup <= gametime){
+		return 0; // no new tics available.
+	}
+
     // get real tics		
     entertic = I_GetTime ()/ticdup;
     realtics = entertic - oldentertics;
@@ -728,7 +734,7 @@ void TryRunTics (void)
 	if (I_GetTime ()/ticdup - entertic >= 20)
 	{
 	    M_Ticker ();
-	    return;
+	    return 1; // web modification for wasm port
 	} 
     }
     
@@ -764,4 +770,6 @@ void TryRunTics (void)
 	}
 	NetUpdate ();	// check for new console commands
     }
+
+	return 1; // web modification for wasm port
 }
