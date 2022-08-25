@@ -160,9 +160,19 @@ WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
       obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
     });
 
+    const animationfps_stats = document.getElementById("animationfps_stats");
+    var number_of_animation_frames = 0; // in current second
+    window.setInterval(function(){
+        animationfps_stats.innerText = number_of_animation_frames;
+        number_of_animation_frames = 0;
+    }, 1000);
+
+    // Main game loop
+    // 
     // We've change Doom source code such that Doom itself is not looping,
     // but we can call the loop here via `window.requestAnimationFrame()`.
     function step(timestamp) {
+      ++number_of_animation_frames;
       obj.instance.exports.doom_loop_step();
       window.requestAnimationFrame(step);
     }
