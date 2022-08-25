@@ -1,6 +1,8 @@
 'use strict';
 var memory = new WebAssembly.Memory({ initial : 108 });
 
+// stdout and stderr goes here
+
 const output = document.getElementById("output");
 
 function readWasmString(offset, length) {
@@ -30,6 +32,7 @@ function appendOutput(style) {
   }
 }
 
+// Stats about how often doom polls the time.
 const getmsps_stats = document.getElementById("getmsps_stats");
 const getms_stats = document.getElementById("getms_stats");
 var getms_calls_total = 0;
@@ -102,6 +105,9 @@ function drawCanvas(ptr) {
 
 // WebAssembly specific stuffs
 
+// These functions will be available in WebAssembly. We also share the memory to
+// share larger amounts of data with javascript, e.g. strings of the video
+// output.
 var importObject = {
   js: {
     js_console_log: appendOutput("log"),
@@ -117,10 +123,10 @@ var importObject = {
 
 WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
   .then(obj => {
-    // Initialize.
+    // Initialize Doom.
     obj.instance.exports.main();
 
-    // Respond to keyboard input.
+    // Input handling
     //
     // Register JavaScript event listeners for key presses and insert the
     // corresponding key code into Doom's event queue.
@@ -153,15 +159,37 @@ WebAssembly.instantiateStreaming(fetch('xdoom.wasm'), importObject)
       }
     };
 
+    let keyDown = function(keyCode) {obj.instance.exports.add_browser_event(0 /*KeyDown*/, keyCode);};
+    let keyUp = function(keyCode) {obj.instance.exports.add_browser_event(1 /*KeyUp*/, keyCode);};
+
+    // Respond to keyboard input.
     canvas.addEventListener('keydown', function(event) {
-      obj.instance.exports.add_browser_event(0 /*KeyDown*/, doomKeyCode(event.keyCode));
+      keyDown(doomKeyCode(event.keyCode));
       event.preventDefault();
     }, false);
     canvas.addEventListener('keyup', function(event) {
-      obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
+      keyUp(doomKeyCode(event.keyCode));
       event.preventDefault();
     }, false);
 
+    // Mobile touch input
+    [["enterButton", 13],
+     ["leftButton", 0xac],
+     ["rightButton", 0xae],
+     ["upButton", 0xad],
+     ["downButton", 0xaf],
+     ["ctrlButton", 0x80+0x1d],
+     ["spaceButton", 32],
+     ["altButton", 0x80+0x38]].forEach(([elementID, keyCode]) => {
+        console.log(elementID + " for " + keyCode);
+        var button = document.getElementById(elementID);
+        //button.addEventListener("click", () => {keyDown(keyCode); keyUp(keyCode)} );
+        button.addEventListener("touchstart", () => keyDown(keyCode));
+        button.addEventListener("touchend", () => keyUp(keyCode));
+        button.addEventListener("touchcancel", () => keyUp(keyCode));
+    });
+
+    // Hint that the canvas should have focus to capute keyboard events.
     const focushint = document.getElementById("focushint");
     const printFocusInHint = function(e) {
       focushint.innerText = "Keyboard events will be captured as long as the the DOOM canvas has focus.";
