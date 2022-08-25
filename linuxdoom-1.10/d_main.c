@@ -351,7 +351,8 @@ void D_Display (void)
 //
 extern  boolean         demorecording;
 
-void D_DoomLoop (void)
+// Change because we're porting to wasm.
+void D_DoomLoop_prepare (void)
 {
     if (demorecording)
 	G_BeginRecording ();
@@ -365,9 +366,12 @@ void D_DoomLoop (void)
     }
 	
     I_InitGraphics ();
+}
 
-    while (1)
-    {
+
+
+// Change because we're porting to wasm.
+void D_DoomLoop_loop (void) {
 	// frame syncronous IO operations
 	I_StartFrame ();                
 	
@@ -403,7 +407,16 @@ void D_DoomLoop (void)
 	// Update sound output.
 	I_SubmitSound();
 #endif
-    }
+}
+
+
+
+// Change because we're porting to wasm.
+void D_DoomLoop (void) { // TODO: remove!!
+	D_DoomLoop_prepare();
+	while(1){
+		D_DoomLoop_loop();
+	}
 }
 
 
@@ -795,6 +808,12 @@ void FindResponseFile (void)
 //
 void D_DoomMain (void)
 {
+	// The following three lines were added during porting to wasm for debugging
+	// purpose.
+	puts("Starting D_DoomMain");
+	printf("Triggering a printf\n");
+	printf("Doom's screen is %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
+
     int             p;
     char                    file[256];
 
@@ -877,8 +896,10 @@ void D_DoomMain (void)
     if (M_CheckParm("-cdrom"))
     {
 	printf(D_CDROM);
-	mkdir("c:\\doomdata",0);
-	strcpy (basedefault,"c:/doomdata/default.cfg");
+	// Wasm port - remove disk support
+	// mkdir("c:\\doomdata",0);
+	// strcpy (basedefault,"c:/doomdata/default.cfg");
+	I_Error("CDROM support removed.");
     }	
     
     // turbo option
@@ -1057,7 +1078,9 @@ void D_DoomMain (void)
 	    "                      press enter to continue\n"
 	    "===========================================================================\n"
 	    );
-	getchar ();
+	// Wasm port - remove stdin processing
+	// getchar ();
+	I_Error("The original game would call getchar () now, but I decided to remove this call so I don't have to emulate STDIN processing when moving to the web.");
     }
 	
 
@@ -1167,5 +1190,8 @@ void D_DoomMain (void)
 
     }
 
-    D_DoomLoop ();  // never returns
+	// Disabled when porting to wasm -- inversion of control, browser controls
+	// the loop.
+    // D_DoomLoop ();  // never returns
+	D_DoomLoop_prepare();
 }
